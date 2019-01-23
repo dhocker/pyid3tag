@@ -1,0 +1,9 @@
+*.pyc
+*.log
+*.mp3
+build/
+dist/
+Thumbs.db
+.idea/
+.DS_Store
+.vscode/
