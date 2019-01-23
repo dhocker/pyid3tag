@@ -139,7 +139,6 @@ class ID3EditorFrame(Tk):
         self._tags_changed = True
         # Reload all of the tags so they are sorted
         self._load_tags(self.id3)
-        # messagebox.showinfo("+Tag", "Not implemented")
 
     def _delete_tag(self):
         messagebox.showinfo("Delete", "Not implemented")
@@ -219,6 +218,7 @@ class ID3EditorFrame(Tk):
 
         tvw.tooltip = id3frames.frame_tooltip(tag)
         tvw.label_widget = tw
+        tvw.tag_name = tag
         tvw.bind("<Enter>", self._on_enter_tag)
         tvw.bind("<Leave>", self._on_leave_tag)
         tvw.bind("<FocusIn>", self._on_focusin)
@@ -236,22 +236,28 @@ class ID3EditorFrame(Tk):
         event.widget.label_widget["bg"] = self.highlight_color
 
     def _on_focusout(self, event):
-        event.widget.label_widget["bg"] = self.background_color
+        tvw = event.widget
+        tvw.label_widget["bg"] = self.background_color
+        # Save edited tag value
+        self._update_tag(tvw.tag_name, tvw.value_var.get())
 
     def _commit_tag_updates(self):
         for t in self._tag_widgets:
-            # t[0] is the tag name label widget and t[1] is its value widget
+            # t[0] is the tag label widget and t[1] is its value widget
             # f = mutagen.id3.Frames[t[0].value_var.get()](text=t[1].value_var.get())
             # f = mutagen.id3.Frame(t[0].value_var.get(), text=t[1].value_var.get())
-            tag_name = t[0].value_var.get()
+            tag_name = t[1].tag_name
             tag_value = t[1].value_var.get()
 
-            f = id3frames.create(tag_name, tag_value)
-            if f:
-                self.id3.add(f)
-            else:
-                # Skip tags without a creator
-                pass
+            self._update_tag(tag_name, tag_value)
+
+    def _update_tag(self, name, value):
+        f = id3frames.create(name, value)
+        if f:
+            self.id3.add(f)
+        else:
+            # Skip tags without a creator
+            pass
 
     def _tag_changed_handler(self, action_code, reason, name):
         """
