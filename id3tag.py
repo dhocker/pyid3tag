@@ -103,7 +103,7 @@ class ID3EditorFrame(Tk):
         gr += 1
 
         # Tags widget
-        self._tags_frame = ID3TagsWidget(self, text="Tags", width=int(sw / 3) - 20, height=100, borderwidth=2)
+        self._tags_frame = ID3TagsWidget(self, text="Tags", width=int(sw / 3) - 20, height=10, borderwidth=2)
         self._tags_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10)
         self.grid_columnconfigure(0, weight=1)
 
@@ -130,10 +130,7 @@ class ID3EditorFrame(Tk):
 
     def _add_tag(self):
         t = self._add_this_tag.get()
-        f = id3frames.create(t, "")
-        self.id3.add(f)
-        # Reload all of the tags so they are sorted
-        self._tags_frame.load_tags(self.id3)
+        self._tags_frame.add_tag(t)
 
     def _delete_tag(self):
         messagebox.showinfo("Delete", "Not implemented")
@@ -161,9 +158,11 @@ class ID3EditorFrame(Tk):
                 # self.mp3 = mutagen.mp3.MP3(fn)
                 self.id3 = mutagen.id3.ID3(fn)
                 self._tags_frame.load_tags(self.id3)
+                self._status_bar.set(fn)
             except mutagen.id3.ID3NoHeaderError as ex:
                 messagebox.showerror("No Header Error", str(ex))
                 self.id3 = mutagen.id3.ID3()
+                self._tags_frame.load_tags(self.id3)
             except Exception as err:
                 messagebox.showerror("Exception", str(err))
 

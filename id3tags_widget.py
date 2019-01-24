@@ -53,6 +53,7 @@ class ID3TagsWidget(LabelFrame):
     def add_tag(self, tag):
         f = id3frames.create(tag, "")
         self.id3.add(f)
+        self._tags_changed = True
         # Reload all of the tags so they are sorted
         self.load_tags(self.id3)
 
@@ -65,6 +66,11 @@ class ID3TagsWidget(LabelFrame):
         for t in self._tag_widgets:
             t[0].destroy()
             t[1].destroy()
+
+        # Brute force way to get the tags frame resized
+        self._tags_frame.grid_remove()
+        self._tags_frame.grid()
+
         self._tag_widgets = []
 
         # Sort tags
