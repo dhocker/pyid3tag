@@ -22,6 +22,7 @@ import tkinter
 import mutagen
 import mutagen.id3
 import id3frames
+from tool_tip_popup import ToolTipPopup
 
 
 class ID3TagsWidget(LabelFrame):
@@ -91,9 +92,7 @@ class ID3TagsWidget(LabelFrame):
         tw.value_var = v
         tw.grid(row=gr, column=0, sticky=tkinter.E)
 
-        tw.tooltip = id3frames.frame_tooltip(tag)
-        tw.bind("<Enter>", self._on_enter_tag)
-        tw.bind("<Leave>", self._on_leave_tag)
+        tw.tooltip = ToolTipPopup(tw, id3frames.frame_tooltip(tag))
 
         # Tag value widget
         v = StringVar(value=value)
