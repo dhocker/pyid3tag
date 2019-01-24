@@ -19,8 +19,7 @@ from collections import OrderedDict
 from tkinter import filedialog, messagebox
 from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar
 import tkinter
-import mutagen
-import mutagen.id3
+from tkinter import ttk
 import id3frames
 from tool_tip_popup import ToolTipPopup
 
@@ -38,12 +37,35 @@ class ID3TagsWidget(LabelFrame):
         # Each list item is a 2-tuple of tag label and tag text widget
         self._tag_widgets = []
 
+        # Header/buttons frame
+        self._buttons_frame = Frame(self, width=int(width / 3) - 20, height=10)
+        self._buttons_frame.grid(row=0, column=0, sticky=tkinter.E + tkinter.W, padx=10, pady=10)
+        self._buttons_frame.columnconfigure(0, weight=1)
+
+        # Add tag button
+        self._add_button = Button(self._buttons_frame, text="Add Tag", width=7, command=self._add_tag)
+        self._add_button.grid(row=0, column=1, sticky=tkinter.E, padx=10)
+
+        # Tag selection
+        self._add_this_tag = StringVar()
+        # Create list of available tags
+        self._tag_list = ttk.Combobox(self._buttons_frame, values=id3frames.frame_keys(),
+                                      width=6,
+                                      textvariable=self._add_this_tag)
+        self._tag_list.grid(row=0, column=2, sticky=tkinter.E)
+        self._tag_list.state(['!disabled', 'readonly'])
+        self._tag_list.current(0)
+
+        # Delete tag button - deletes the current tag
+        self._delete_button = Button(self._buttons_frame, text="Delete Tag", width=10, command=self._delete_tag)
+        self._delete_button.grid(row=0, column=3, sticky=tkinter.E, padx=10)
+
         # Handle changes to tag values
         self._tag_changed_event = (self.register(self._tag_changed_handler), '%d', '%V', '%W')
 
         # Tags frame
         self._tags_frame = Frame(self, width=width - 20, height=height, borderwidth=2)
-        self._tags_frame.grid(row=0, column=0, sticky=tkinter.E + tkinter.W, padx=10)
+        self._tags_frame.grid(row=1, column=0, sticky=tkinter.E + tkinter.W, padx=10)
         self.grid_columnconfigure(0, weight=1)
 
     @property
@@ -117,6 +139,13 @@ class ID3TagsWidget(LabelFrame):
         tvw.bind("<FocusOut>", self._on_focusout)
 
         self._tag_widgets.append((tw, tvw))
+
+    def _add_tag(self):
+        t = self._add_this_tag.get()
+        self.add_tag(t)
+
+    def _delete_tag(self):
+        messagebox.showinfo("Delete", "Not implemented")
 
     def _on_enter_tag(self, event):
         # TODO Turn this into a pop up tooltip

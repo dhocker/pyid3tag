@@ -82,24 +82,6 @@ class ID3EditorFrame(Tk):
         self._save_button = Button(self._buttons_frame, text="Save", width=6, command=self._save_file)
         self._save_button.grid(row=0, column=1, sticky=tkinter.W, padx=10)
 
-        # Add tag button
-        self._add_button = Button(self._buttons_frame, text="Add Tag", width=7, command=self._add_tag)
-        self._add_button.grid(row=0, column=2, sticky=tkinter.W, padx=10)
-
-        # Tag selection
-        self._add_this_tag = StringVar()
-        # Create list of available tags
-        self._tag_list = ttk.Combobox(self._buttons_frame, values=id3frames.frame_keys(),
-                                      width=6,
-                                      textvariable=self._add_this_tag)
-        self._tag_list.grid(row=0, column=3, sticky=tkinter.W)
-        self._tag_list.state(['!disabled', 'readonly'])
-        self._tag_list.current(0)
-
-        # Delete tag button - deletes the current tag
-        self._delete_button = Button(self._buttons_frame, text="Delete", width=6, command=self._delete_tag)
-        self._delete_button.grid(row=0, column=4, sticky=tkinter.W, padx=10)
-
         gr += 1
 
         # Tags widget
@@ -127,13 +109,6 @@ class ID3EditorFrame(Tk):
                 return False
         self.destroy()
         return True
-
-    def _add_tag(self):
-        t = self._add_this_tag.get()
-        self._tags_frame.add_tag(t)
-
-    def _delete_tag(self):
-        messagebox.showinfo("Delete", "Not implemented")
 
     def _save_file(self):
         self._tags_frame.commit_tag_updates()
