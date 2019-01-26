@@ -125,10 +125,10 @@ class ID3TagsWidget(LabelFrame):
 
         # Tag value widget
         v = StringVar(value=value)
-        # w = max(50, len(v.get()))
+        w = max(30, len(v.get()))
         tvw = Entry(self._tags_frame, textvariable=v, validate='key',
                     validatecommand=self._tag_changed_event,
-                    width=len(str(value)))
+                    width=w)
         tvw.value_var = v
         tvw.grid(row=gr, column=1, sticky=tkinter.W + tkinter.E)
 
