@@ -76,6 +76,10 @@ class ID3TagsWidget(LabelFrame):
     def tags_changed(self):
         return self._tags_changed
 
+    @tags_changed.setter
+    def tags_changed(self, value):
+        self._tags_changed = value
+
     def add_tag(self, tag):
         f = id3frames.create(tag, "")
         self.id3.add(f)

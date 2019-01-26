@@ -106,9 +106,8 @@ class ID3EditorFrame(Tk):
         App is closing. Warn user if unsaved changes.
         :return:
         """
-        if self._tags_frame.tags_changed:
-            if not messagebox.askyesno("Unsaved changes", "Discard changes?"):
-                return False
+        if self._are_unsaved_changes():
+            return False
         self.destroy()
         return True
 
@@ -120,6 +119,10 @@ class ID3EditorFrame(Tk):
         self._status_bar.set("Tags saved to %s" % fn)
 
     def _open_file(self, fn):
+        # If unsaved changes were not handled, abort opening file
+        if self._are_unsaved_changes():
+            return
+
         # An existing mp3 file was selected, but there is
         # no guarantee that it contains an ID3 block.
         self.title("ID3 Tag Editor: " + fn)
@@ -133,12 +136,25 @@ class ID3EditorFrame(Tk):
             self.id3 = mutagen.id3.ID3(fn)
             self._tags_frame.load_tags(self.id3)
             self._status_bar.set(fn)
+            self._tags_frame.tags_changed = False
         except mutagen.id3.ID3NoHeaderError as ex:
             messagebox.showerror("No Header Error", str(ex))
             self.id3 = mutagen.id3.ID3()
             self._tags_frame.load_tags(self.id3)
         except Exception as err:
             messagebox.showerror("Exception", str(err))
+
+    def _are_unsaved_changes(self):
+        """
+
+        :return: True if changes have been handled. False if changes have not
+        been handled.
+        """
+        if self._tags_frame.tags_changed:
+            # askyesno returns True if YES was chosen.
+            # Discard changes means there are no changes to save, so we return False
+            return not messagebox.askyesno("Unsaved changes", "Discard changes?")
+        return False
 
 
 if __name__ == '__main__':
