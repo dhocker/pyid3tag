@@ -32,6 +32,7 @@ import tkinter
 import mutagen
 import mutagen.id3
 import id3frames
+from filelist_widget import FileList
 from id3tags_widget import ID3TagsWidget
 from status_bar import StatusBar
 
@@ -46,7 +47,7 @@ class ID3EditorFrame(Tk):
 
         # Position and size main window
         self.title("ID3 Tag Editor")
-        geo = "{0}x{1}+{2}+{3}".format(int(sw/3), int(sh/2), int(sw/8), int(sh/8))
+        geo = "{0}x{1}+{2}+{3}".format(int(sw/2), int(sh/2), int(sw/8), int(sh/8))
         self.geometry(geo)
         self.resizable(width=True, height=True)
 
@@ -67,37 +68,38 @@ class ID3EditorFrame(Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _create_widgets(self, sw, sh):
-        # Grid row tracker
+
+        self.columnconfigure(0, weight=1)
+        # self.columnconfigure(1, weight=2)
+
+        # Left hand frame (file list)
+        self._filelist = FileList(self, width=int(sw / 6) - 10, height=int(sh / 2) - 10,
+                                  open=self._open_file, save=self._save_file)
+        self._filelist.grid(row=0, column=0, sticky=tkinter.E + tkinter.W + tkinter.N +tkinter.S,
+                            padx=10, pady=10)
+
+        # Right hand frame (tags list)
+        self._rhframe = Frame(self, width=int(sw / 6) - 20, height=100)
+        self._rhframe.grid(row=0, column=1, sticky=tkinter.E + tkinter.W + tkinter.N + tkinter.S,
+                           padx=10, pady=10)
+
+        # Grid row tracker for right hand frame (tags info)
         gr = 0
 
-        # Header/buttons frame
-        self._buttons_frame = Frame(self, width=int(sw / 3) - 20, height=100)
-        self._buttons_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10, pady=10)
-
-        # Open File button
-        self._open_button = Button(self._buttons_frame, text="Open", width=6, command=self._open_file)
-        self._open_button.grid(row=0, column=0, sticky=tkinter.W, padx=10)
-
-        # Save file button
-        self._save_button = Button(self._buttons_frame, text="Save", width=6, command=self._save_file)
-        self._save_button.grid(row=0, column=1, sticky=tkinter.W, padx=10)
-
-        gr += 1
-
         # Tags widget
-        self._tags_frame = ID3TagsWidget(self, text="Tags", width=int(sw / 3) - 20, height=10, borderwidth=2)
+        self._tags_frame = ID3TagsWidget(self._rhframe, text="Tags", width=int(sw / 4) - 10, height=10, borderwidth=2)
         self._tags_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10)
-        self.grid_columnconfigure(0, weight=1)
 
         gr += 1
 
         # Footer frame
-        self._footer_frame = Frame(self, width=int(sw / 3) - 20, bg=self.highlight_color, bd=1, relief=tkinter.SOLID)
+        self._footer_frame = Frame(self._rhframe, width=int(sw / 4) - 20, bg=self.highlight_color,
+                                   bd=1, relief=tkinter.SOLID)
         self._footer_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10, pady=10)
 
         # Status bar in footer frame
-        self._status_bar = StatusBar(self._footer_frame, text="Status Bar", bg=self.highlight_color)
-        self._status_bar.grid(row=0, column=0, sticky=tkinter.W)
+        self._status_bar = StatusBar(self._footer_frame, text="", bg=self.highlight_color, bd=0)
+        self._status_bar.grid(row=0, column=0, sticky=tkinter.W + tkinter.E)
 
     def _on_close(self):
         """
@@ -110,36 +112,33 @@ class ID3EditorFrame(Tk):
         self.destroy()
         return True
 
-    def _save_file(self):
+    def _save_file(self, fn):
         self._tags_frame.commit_tag_updates()
-        self.id3.save(self._filename)
+        self.id3.save(fn)
         # messagebox.showinfo("Saved", "Tags saved to %s" % self.filename)
         # TODO How to handle this
-        self._status_bar.set("Tags saved to %s" % self._filename)
+        self._status_bar.set("Tags saved to %s" % fn)
 
-    def _open_file(self):
-        fn = filedialog.askopenfilename(initialdir=self._mp3_dir, title="Select file",
-                                        filetypes=(("mp3 files", "*.mp3"),("all files", "*.*")))
-        if fn:
-            # An existing mp3 file was selected, but there is
-            # no guarantee that it contains an ID3 block.
-            self.title("ID3 Tag Editor: " + fn)
-            self._filename = fn
-            # TODO It would be nice to persist the last used path
-            self._mp3_dir = os.path.dirname(fn)
+    def _open_file(self, fn):
+        # An existing mp3 file was selected, but there is
+        # no guarantee that it contains an ID3 block.
+        self.title("ID3 Tag Editor: " + fn)
+        self._filename = fn
+        # TODO It would be nice to persist the last used path
+        self._mp3_dir = os.path.dirname(fn)
 
-            # Load tags from file
-            try:
-                # self.mp3 = mutagen.mp3.MP3(fn)
-                self.id3 = mutagen.id3.ID3(fn)
-                self._tags_frame.load_tags(self.id3)
-                self._status_bar.set(fn)
-            except mutagen.id3.ID3NoHeaderError as ex:
-                messagebox.showerror("No Header Error", str(ex))
-                self.id3 = mutagen.id3.ID3()
-                self._tags_frame.load_tags(self.id3)
-            except Exception as err:
-                messagebox.showerror("Exception", str(err))
+        # Load tags from file
+        try:
+            # self.mp3 = mutagen.mp3.MP3(fn)
+            self.id3 = mutagen.id3.ID3(fn)
+            self._tags_frame.load_tags(self.id3)
+            self._status_bar.set(fn)
+        except mutagen.id3.ID3NoHeaderError as ex:
+            messagebox.showerror("No Header Error", str(ex))
+            self.id3 = mutagen.id3.ID3()
+            self._tags_frame.load_tags(self.id3)
+        except Exception as err:
+            messagebox.showerror("Exception", str(err))
 
 
 if __name__ == '__main__':

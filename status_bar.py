@@ -16,12 +16,13 @@
 #
 
 from tkinter import Label, StringVar
+import tkinter
 
 
 class StatusBar(Label):
-    def __init__(self, parent, text="", bg=None):
+    def __init__(self, parent, text="", bg=None, bd=2, relief=tkinter.SOLID):
         self._status_var = StringVar(value=text)
-        super(StatusBar, self).__init__(parent, textvariable=self._status_var, bg=bg)
+        super(StatusBar, self).__init__(parent, textvariable=self._status_var, bg=bg, bd=bd, relief=relief)
 
     def set(self, text):
         self._status_var.set(text)

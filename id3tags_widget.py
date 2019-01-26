@@ -66,7 +66,11 @@ class ID3TagsWidget(LabelFrame):
         # Tags frame
         self._tags_frame = Frame(self, width=width - 20, height=height, borderwidth=2)
         self._tags_frame.grid(row=1, column=0, sticky=tkinter.E + tkinter.W, padx=10)
-        self.grid_columnconfigure(0, weight=1)
+
+        self._tags_frame.columnconfigure(0, weight=1)
+        # self._tags_frame.columnconfigure(1, weight=4)
+
+        self.columnconfigure(0, weight=1)
 
     @property
     def tags_changed(self):
@@ -107,9 +111,6 @@ class ID3TagsWidget(LabelFrame):
             # Tag name and value widgets
             self._add_tag_widget(tag, id3[tag].text[0])
 
-        self._tags_frame.grid_columnconfigure(0, weight=1)
-        self._tags_frame.grid_columnconfigure(1, weight=4)
-
     def _add_tag_widget(self, tag, value):
         # Determine the grid row for this tag
         gr = len(self._tag_widgets)
@@ -126,7 +127,8 @@ class ID3TagsWidget(LabelFrame):
         v = StringVar(value=value)
         # w = max(50, len(v.get()))
         tvw = Entry(self._tags_frame, textvariable=v, validate='key',
-                    validatecommand=self._tag_changed_event)
+                    validatecommand=self._tag_changed_event,
+                    width=len(str(value)))
         tvw.value_var = v
         tvw.grid(row=gr, column=1, sticky=tkinter.W + tkinter.E)
 
