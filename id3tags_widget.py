@@ -17,11 +17,11 @@
 
 from collections import OrderedDict
 from tkinter import filedialog, messagebox
-from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar
+from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, OptionMenu
 import tkinter
-from tkinter import ttk
 import id3frames
 from tool_tip_popup import ToolTipPopup
+from tag_help_window import TagHelpWindow
 
 
 class ID3TagsWidget(LabelFrame):
@@ -33,6 +33,7 @@ class ID3TagsWidget(LabelFrame):
         self.highlight_color = "#e0e0e0"
         self.id3 = None
         self._tags_changed = False
+        self._tag_help_window = None
 
         # Each list item is a 2-tuple of tag label and tag text widget
         self._tag_widgets = []
@@ -46,19 +47,21 @@ class ID3TagsWidget(LabelFrame):
         self._add_button = Button(self._buttons_frame, text="Add Tag", width=7, command=self._add_tag)
         self._add_button.grid(row=0, column=1, sticky=tkinter.E, padx=10)
 
-        # Tag selection
+        # Tag selection as an OptionMenu
         self._add_this_tag = StringVar()
-        # Create list of available tags
-        self._tag_list = ttk.Combobox(self._buttons_frame, values=id3frames.frame_keys(),
-                                      width=6,
-                                      textvariable=self._add_this_tag)
-        self._tag_list.grid(row=0, column=2, sticky=tkinter.E)
-        self._tag_list.state(['!disabled', 'readonly'])
-        self._tag_list.current(0)
+        opts = id3frames.frame_keys()
+        self._add_this_tag.set(opts[0])
+        self._tag_opt = OptionMenu(self._buttons_frame, self._add_this_tag, *opts)
+        self._tag_opt.config(width=10)
+        self._tag_opt.grid(row=0, column=2, sticky=tkinter.E, padx=10)
+
+        # Tag help button
+        self._tag_help_button = Button(self._buttons_frame, text="Tag Help", width=9, command=self._show_tag_help)
+        self._tag_help_button.grid(row=0, column=3, sticky=tkinter.E, padx=10)
 
         # Delete tag button - deletes the current tag
         self._delete_button = Button(self._buttons_frame, text="Delete Tag", width=10, command=self._delete_tag)
-        self._delete_button.grid(row=0, column=3, sticky=tkinter.E, padx=10)
+        self._delete_button.grid(row=0, column=4, sticky=tkinter.E, padx=10)
 
         # Handle changes to tag values
         self._tag_changed_event = (self.register(self._tag_changed_handler), '%d', '%V', '%W')
@@ -149,6 +152,28 @@ class ID3TagsWidget(LabelFrame):
     def _add_tag(self):
         t = self._add_this_tag.get()
         self.add_tag(t)
+
+    def _show_tag_help(self):
+        if not self._tag_help_window:
+            # We would like to position the help window to the right size
+            # of the main window. However, we really don't know the main window.
+            # This is about as dangerous as it gets...depending on the main
+            # window being 2 back
+            self._tag_help_window = TagHelpWindow(self,
+                                                  x=self.master.master.winfo_rootx() + self.master.master.winfo_width() + 1,
+                                                  y=self.master.master.winfo_rooty(),
+                                                  width=400, height=200,
+                                                  close=self._on_tag_help_close)
+        else:
+            self._tag_help_window.show()
+
+    def _on_tag_help_close(self):
+        """
+        The help window was closed.
+        :return:
+        """
+        self._tag_help_window = None
+        return True
 
     def _delete_tag(self):
         messagebox.showinfo("Delete", "Not implemented")
