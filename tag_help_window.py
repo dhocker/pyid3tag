@@ -84,7 +84,7 @@ class TagHelpWindow(tkinter.Toplevel):
         :return:
         """
         return """
-Currentl Supported Tags
+Currently Supported Tags
 -----------------------
 COMM: Comment
 TALB: Album title
