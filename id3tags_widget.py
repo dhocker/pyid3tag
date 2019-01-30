@@ -25,7 +25,8 @@ from tag_help_window import TagHelpWindow
 
 
 class ID3TagsWidget(LabelFrame):
-    def __init__(self, parent, text="", width=100, height=10, borderwidth=0):
+    def __init__(self, parent, text="", width=100, height=10, borderwidth=0,
+                 tag_changed=None):
         super(ID3TagsWidget, self).__init__(parent, text=text, width=width, height=height,
                                             borderwidth=borderwidth)
 
@@ -33,10 +34,12 @@ class ID3TagsWidget(LabelFrame):
         self.highlight_color = "#e0e0e0"
         self.id3 = None
         self._tags_changed = False
+        self._tag_changed_callback = tag_changed
         self._tag_help_window = None
 
         # Each list item is a 2-tuple of tag label and tag text widget
         self._tag_widgets = []
+        self._selected_tag = None
 
         # Header/buttons frame
         self._buttons_frame = Frame(self, width=int(width / 3) - 20, height=10)
@@ -89,9 +92,6 @@ class ID3TagsWidget(LabelFrame):
         self._tags_changed = True
         # Reload all of the tags so they are sorted
         self.load_tags(self.id3)
-
-    def delete_tag(self):
-        messagebox.showinfo("Delete", "Not implemented")
 
     def load_tags(self, id3):
         self.id3 = id3
@@ -176,7 +176,13 @@ class ID3TagsWidget(LabelFrame):
         return True
 
     def _delete_tag(self):
-        messagebox.showinfo("Delete", "Not implemented")
+        # Need to know the currently selected tag
+        tag_name = self._selected_tag.label_widget.value_var.get()
+        self.id3.delall(tag_name)
+        # Need to update tags list
+        self.load_tags(self.id3)
+        self.tags_changed = True
+        # messagebox.showinfo("Delete", "Not implemented")
 
     def _on_enter_tag(self, event):
         # TODO Turn this into a pop up tooltip
@@ -190,6 +196,7 @@ class ID3TagsWidget(LabelFrame):
 
     def _on_focusin(self, event):
         event.widget.label_widget["bg"] = self.highlight_color
+        self._selected_tag = event.widget
 
     def _on_focusout(self, event):
         tvw = event.widget
@@ -230,9 +237,14 @@ class ID3TagsWidget(LabelFrame):
         for t in self._tag_widgets:
             if str(t[1]) == name:
                 # print("Named entry widget found")
+                changed = t
                 break
 
         # print("Tag changed event: <{0}><{1}><{2}>".format(action_code, reason, name))
         if reason == 'key' and action_code in ['0', '1']:
             self._tags_changed = True
+            changed_tag = changed[0].value_var.get()
+            new_value = changed[1].value_var.get()
+            if self._tag_changed_callback:
+                self._tag_changed_callback(changed_tag, new_value)
         return True

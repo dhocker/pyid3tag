@@ -26,7 +26,7 @@
 import os.path
 from collections import OrderedDict
 from tkinter import filedialog, messagebox
-from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar
+from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, Menu
 from tkinter import ttk
 import tkinter
 import mutagen
@@ -51,7 +51,10 @@ class ID3EditorFrame(Tk):
         self.geometry(geo)
         self.resizable(width=True, height=True)
 
+        # The currently opened file
         self._filename = ""
+        # The currently selected file (may not be open)
+        self._selected_filename = ""
         # TODO It would be nice to persist the last used path
         self._mp3_dir = "./"
 
@@ -69,12 +72,29 @@ class ID3EditorFrame(Tk):
 
     def _create_widgets(self, sw, sh):
 
+        # App menu bar
+        self._menu_bar = Menu(self)
+
+        self._file_menu = Menu(self._menu_bar, tearoff=0)
+        self._file_menu.add_command(label="Open directory", command=self._open_directory_command)
+        self._file_menu.add_command(label="Edit file", command=self._open_file_command,
+                                    state=tkinter.DISABLED)
+        # TODO Implement save file command
+        self._file_menu.add_command(label="Save file", command=None, state=tkinter.DISABLED)
+        self._file_menu.add_separator()
+        self._file_menu.add_command(label="Quit", command=self._on_close)
+        self._menu_bar.add_cascade(label="File", menu=self._file_menu)
+
+        self.config(menu=self._menu_bar)
+
         self.columnconfigure(0, weight=1)
         # self.columnconfigure(1, weight=2)
 
         # Left hand frame (file list)
         self._filelist = FileList(self, width=int(sw / 6) - 10, height=int(sh / 2) - 10,
-                                  open=self._open_file, save=self._save_file)
+                                  open_file=self._open_file, save_file=self._save_file,
+                                  select_file=self._select_file,
+                                  open_directory=self._open_directory)
         self._filelist.grid(row=0, column=0, sticky=tkinter.E + tkinter.W + tkinter.N +tkinter.S,
                             padx=10, pady=10)
 
@@ -87,7 +107,9 @@ class ID3EditorFrame(Tk):
         gr = 0
 
         # Tags widget
-        self._tags_frame = ID3TagsWidget(self._rhframe, text="Tags", width=int(sw / 4) - 10, height=10, borderwidth=2)
+        self._tags_frame = ID3TagsWidget(self._rhframe, text="Tags", width=int(sw / 4) - 10,
+                                         height=10, borderwidth=2,
+                                         tag_changed=self._changed_tag)
         self._tags_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10)
 
         gr += 1
@@ -112,6 +134,11 @@ class ID3EditorFrame(Tk):
         return True
 
     def _save_file(self, fn):
+        """
+        Save the current tags into its file
+        :param fn: File where tags are to be saved
+        :return: None
+        """
         self._tags_frame.commit_tag_updates()
         self.id3.save(fn)
         # messagebox.showinfo("Saved", "Tags saved to %s" % self.filename)
@@ -126,6 +153,7 @@ class ID3EditorFrame(Tk):
         # An existing mp3 file was selected, but there is
         # no guarantee that it contains an ID3 block.
         self.title("ID3 Tag Editor: " + fn)
+        # Remember where the tags came from
         self._filename = fn
         # TODO It would be nice to persist the last used path
         self._mp3_dir = os.path.dirname(fn)
@@ -143,6 +171,37 @@ class ID3EditorFrame(Tk):
             self._tags_frame.load_tags(self.id3)
         except Exception as err:
             messagebox.showerror("Exception", str(err))
+
+    def _select_file(self, fn):
+        """
+        A file has been selected.
+        :param fn: Full path of selected file.
+        :return: None
+        """
+        # Once a file is selected it can be opened
+        self._selected_filename = fn
+        self._file_menu.entryconfigure(1, state=tkinter.NORMAL)
+
+    def _open_directory(self):
+        """
+        A new directory has been opened.
+        :return:
+        """
+        # Since nothing is selected, disable the open file menu item
+        self._file_menu.entryconfigure(1, state=tkinter.DISABLED)
+
+    def _open_directory_command(self):
+        self._filelist.open_directory()
+
+    def _open_file_command(self):
+        self._open_file(self._selected_filename)
+
+    def _save_file_command(self):
+        self._save_file(self._filename)
+
+    def _changed_tag(self, tag_name, tag_value):
+        self._file_menu.entryconfigure(2, state=tkinter.NORMAL)
+        # TODO How to pass changed_tag event to filelist widget?
 
     def _are_unsaved_changes(self):
         """

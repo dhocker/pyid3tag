@@ -26,12 +26,28 @@ class FileList(Frame):
     File list widget with vertical and horizontal scrollbars
     """
 
-    def __init__(self, parent, width=100, height=100, borderwidth=0, open=None, save=None):
+    def __init__(self, parent, width=100, height=100, borderwidth=0,
+                 open_file=None, save_file=None, select_file=None, open_directory=None):
+        """
+
+        :param parent:
+        :param width:
+        :param height:
+        :param borderwidth:
+        :param open_file: on open file event
+        :param save_file: on save file event
+        :param select_file: on file selected
+        :param open_directory: on directory opened
+        """
         super(FileList, self).__init__(parent, width=width, height=height,
                                        borderwidth=borderwidth)
 
-        self._save_file_callback = save
-        self._open_file_callback = open
+        # Event callbacks
+        self._save_file_callback = save_file
+        self._open_file_callback = open_file
+        self._select_file_callback = select_file
+        self._open_directory_callback = open_directory
+
         self._file_type = None
         # TODO It would be nice to persist the last used path
         self._mp3_dir = "./"
@@ -46,15 +62,17 @@ class FileList(Frame):
         self._buttons_frame.grid(row=0, column=0, sticky=tkinter.E + tkinter.W, padx=10, pady=10)
 
         # Open Directory button
-        self._open_button = Button(self._buttons_frame, text="Directory", width=10, command=self._open_directory)
+        self._open_button = Button(self._buttons_frame, text="Directory", width=10, command=self.open_directory)
         self._open_button.grid(row=0, column=0, sticky=tkinter.W, padx=2)
 
         # Open File button
-        self._open_button = Button(self._buttons_frame, text="File", width=5, command=self._open_file)
+        self._open_button = Button(self._buttons_frame, text="Edit file", width=5,
+                                   command=self._open_file, state=tkinter.DISABLED)
         self._open_button.grid(row=0, column=1, sticky=tkinter.W, padx=2)
 
         # Save file button
-        self._save_button = Button(self._buttons_frame, text="Save", width=5, command=self._save_file)
+        self._save_button = Button(self._buttons_frame, text="Save file", width=5,
+                                   command=self._save_file, state=tkinter.DISABLED)
         self._save_button.grid(row=0, column=2, sticky=tkinter.W, padx=2)
 
         # Vertical scrollbar
@@ -76,33 +94,47 @@ class FileList(Frame):
         self._filelist_hscroll['command'] = self._filelist.xview
         self._filelist_vscroll['command'] = self._filelist.yview
         self._filelist.bind("<Double-1>", self._open_file)
+        self._filelist.bind("<<ListboxSelect>>", self._on_selected)
 
         # Status bar in footer frame
         self._status_bar = StatusBar(self, text="", bg=self.highlight_color, bd=1)
         self._status_bar.grid(row=3, column=0, sticky=tkinter.W + tkinter.E)
 
+    @property
+    def selected_filename(self):
+        return self._filename
+
     def _save_file(self):
         if self._save_file_callback:
             self._save_file_callback(self._mp3_dir + self._filename)
 
-    def _open_directory(self):
+    def open_directory(self):
         # TODO Change to open directory
         directory = filedialog.askdirectory(initialdir=self._mp3_dir, title="Select directory")
         if directory:
             if not directory.endswith("/"):
                 directory += "/"
             self._mp3_dir = directory
-           # Load listbox with files from directory
+            # Load listbox with files from directory
             self._filelist.delete(0, last=self._filelist.size() - 1)
             for file in os.listdir(directory):
                 if file.endswith(".mp3"):
                     self._filelist.insert(tkinter.END, file)
             self._status_bar.set(directory)
+            self._open_button.config(state=tkinter.DISABLED)
+            # If there is an event callback, invoke it
+            if self._open_directory_callback:
+                self._open_directory_callback()
 
-    def _open_file(self, *args):
+    def _on_selected(self, event):
         selectedx = self._filelist.curselection()[0]
         selected = self._filelist.get(selectedx)
         self._filename = selected
 
+        self._open_button.config(state=tkinter.NORMAL)
+        if self._select_file_callback:
+            self._select_file_callback(self._mp3_dir + self._filename)
+
+    def _open_file(self, *args):
         if self._open_file_callback:
-            self._open_file_callback(self._mp3_dir + selected)
+            self._open_file_callback(self._mp3_dir + self._filename)
