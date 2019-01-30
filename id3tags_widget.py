@@ -185,13 +185,9 @@ class ID3TagsWidget(LabelFrame):
         # messagebox.showinfo("Delete", "Not implemented")
 
     def _on_enter_tag(self, event):
-        # TODO Turn this into a pop up tooltip
-        # self._status_bar["text"] = event.widget.tooltip
         pass
 
     def _on_leave_tag(self, event):
-        # TODO Turn this into a pop up tooltip
-        # self._status_bar["text"] = ""
         pass
 
     def _on_focusin(self, event):
