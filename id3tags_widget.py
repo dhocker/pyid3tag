@@ -112,7 +112,8 @@ class ID3TagsWidget(LabelFrame):
         for tag in sorted_tags:
             # Tags we don't support or handle
             tag4 = tag.upper()[0:4]
-            if tag4 in ["APIC", "PRIV"]:
+            # TODO Handle unsupported tags better
+            if tag4 in ["APIC", "MCDI", "PRIV"]:
                 continue
 
             # Tag name and value widgets
