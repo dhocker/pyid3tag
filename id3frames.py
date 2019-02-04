@@ -90,8 +90,10 @@ _frame_creators = OrderedDict({
 
 # Tooltips for most common tags
 _frame_tooltips = {
+    "APIC": "Attached picture",
     "COMM": "Comment",
     "MCDI": "Music CD identifier (unsupported)",
+    "PRIV": "Private (unsupported)",
     "TALB": "Album title",
     "TBPM": "Tempo (beats per minute)",
     "TCON": "Content type",
