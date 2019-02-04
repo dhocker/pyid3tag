@@ -67,7 +67,7 @@ def create_trck(tag, value):
 def _not_implemented(tag, value):
     return None
 
-# Frame creators for most common tags
+# Frame creators for most common supported tags
 _frame_creators = OrderedDict({
     "COMM": create_comm,
     "TALB": create_talb,
@@ -91,6 +91,7 @@ _frame_creators = OrderedDict({
 # Tooltips for most common tags
 _frame_tooltips = {
     "COMM": "Comment",
+    "MCDI": "Music CD identifier (unsupported)",
     "TALB": "Album title",
     "TBPM": "Tempo (beats per minute)",
     "TCON": "Content type",
@@ -101,6 +102,7 @@ _frame_tooltips = {
     "TIT1": "Content group description",
     "TIT2": "Title/songname/content description",
     "TIT3": "Subtitle/description refinement",
+    "TLEN": "Length in milliseconds (unsupported)",
     "TPE1": "Lead performer/soloist(s)",
     "TPE2": "Band/orchestra/accompaniment",
     "TPE3": "Conductor/performer refinement",

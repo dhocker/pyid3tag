@@ -112,23 +112,19 @@ class ID3TagsWidget(LabelFrame):
         for tag in sorted_tags:
             # Tags we don't support or handle
             tag4 = tag.upper()[0:4]
-            if tag4 in ["APIC", "PRIV"]:
-                continue
+            # Handle unsupported tags better
+            if tag4 in id3frames.frame_keys():
+                # Tag name and value widgets
+                self._add_supported_tag(tag, id3[tag].text[0])
+            else:
+                self._add_unsupported_tag(tag)
 
-            # Tag name and value widgets
-            self._add_tag_widget(tag, id3[tag].text[0])
-
-    def _add_tag_widget(self, tag, value):
+    def _add_supported_tag(self, tag, value):
         # Determine the grid row for this tag
         gr = len(self._tag_widgets)
 
         # Tag name widget
-        v = StringVar(value=tag)
-        tw = Label(self._tags_frame, textvariable=v)
-        tw.value_var = v
-        tw.grid(row=gr, column=0, sticky=tkinter.E)
-
-        tw.tooltip = ToolTipPopup(tw, id3frames.frame_tooltip(tag))
+        tw = self._add_tag_name_label(gr, tag)
 
         # Tag value widget
         v = StringVar(value=value)
@@ -148,6 +144,41 @@ class ID3TagsWidget(LabelFrame):
         tvw.bind("<FocusOut>", self._on_focusout)
 
         self._tag_widgets.append((tw, tvw))
+
+    def _add_unsupported_tag(self, tag):
+        # Determine the grid row for this tag
+        gr = len(self._tag_widgets)
+
+        # Tag name widget
+        tw = self._add_tag_name_label(gr, tag)
+
+        # Place holder tag value widget
+        v = StringVar(value="Unsupported")
+        w = max(30, len(v.get()))
+        tvw = Label(self._tags_frame, textvariable=v, width=w, anchor=tkinter.W)
+        tvw.value_var = v
+        tvw.grid(row=gr, column=1, sticky=tkinter.W)
+
+        tvw.tooltip = id3frames.frame_tooltip(tag)
+        tvw.label_widget = tw
+        tvw.tag_name = tag
+        # tvw.bind("<Enter>", self._on_enter_tag)
+        # tvw.bind("<Leave>", self._on_leave_tag)
+        # tvw.bind("<FocusIn>", self._on_focusin)
+        # tvw.bind("<FocusOut>", self._on_focusout)
+
+        self._tag_widgets.append((tw, tvw))
+
+    def _add_tag_name_label(self, gr, tag):
+        # Tag name widget
+        v = StringVar(value=tag)
+        tw = Label(self._tags_frame, textvariable=v)
+        tw.value_var = v
+        tw.grid(row=gr, column=0, sticky=tkinter.E)
+
+        tw.tooltip = ToolTipPopup(tw, id3frames.frame_tooltip(tag))
+
+        return tw
 
     def _add_tag(self):
         t = self._add_this_tag.get()
