@@ -150,6 +150,9 @@ class ID3TagsWidget(LabelFrame):
         gr = len(self._tag_widgets)
 
         # Tag name widget
+        # Some unsupported tags can be very long
+        if len(tag) > 30:
+            tag = tag[:4] + "[length={0}]".format(len(tag))
         tw = self._add_tag_name_label(gr, tag)
 
         # Place holder tag value widget
@@ -176,7 +179,7 @@ class ID3TagsWidget(LabelFrame):
         tw.value_var = v
         tw.grid(row=gr, column=0, sticky=tkinter.E)
 
-        tw.tooltip = ToolTipPopup(tw, id3frames.frame_tooltip(tag))
+        tw.tooltip = ToolTipPopup(tw, id3frames.frame_tooltip(tag[:4]))
 
         return tw
 
