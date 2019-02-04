@@ -71,9 +71,22 @@ class ID3EditorFrame(Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
     def _create_widgets(self, sw, sh):
+        # will return x11 (Linux), win32 or aqua (macOS)
+        gfx_platform = self.tk.call('tk', 'windowingsystem')
 
         # App menu bar
         self._menu_bar = Menu(self)
+
+        # macOS app menu covering things specific to macOS X
+        if gfx_platform == "aqua":
+            self._appmenu = Menu(self._menu_bar, name='apple')
+            self._appmenu.add_command(label='About pyid3tag', command=self._show_about)
+            self._appmenu.add_separator()
+            self._menu_bar.add_cascade(menu=self._appmenu, label='pyid3tag')
+
+            self.createcommand('tk::mac::ShowPreferences', self._show_preferences)
+
+            self._change_app_icon()
 
         self._file_menu = Menu(self._menu_bar, tearoff=0)
         self._file_menu.add_command(label="Open directory", command=self._open_directory_command)
@@ -84,6 +97,13 @@ class ID3EditorFrame(Tk):
         self._file_menu.add_separator()
         self._file_menu.add_command(label="Quit", command=self._on_close)
         self._menu_bar.add_cascade(label="File", menu=self._file_menu)
+
+        # Linux or Win
+        # Reference: https://tkdocs.com/tutorial/menus.html
+        if gfx_platform != 'aqua':
+            self._help_menu = Menu(self._menu_bar, tearoff=0)
+            self._help_menu.add_command(label="About", command=self._show_about, state=tkinter.DISABLED)
+            self._menu_bar.add_cascade(label="Help", menu=self._help_menu)
 
         self.config(menu=self._menu_bar)
 
@@ -122,6 +142,44 @@ class ID3EditorFrame(Tk):
         # Status bar in footer frame
         self._status_bar = StatusBar(self._footer_frame, text="", bg=self.highlight_color, bd=0)
         self._status_bar.grid(row=0, column=0, sticky=tkinter.W + tkinter.E)
+
+    def _change_app_icon(self):
+        # THIS DOES NOT WORK
+        # import sys
+        # from tkinter import PhotoImage
+        #
+        # program_directory = sys.path[0]
+        #
+        # iconfile = os.path.join(program_directory) + "/pyid3tag.gif"
+        # try:
+        #     iconimage = PhotoImage(file=iconfile)
+        #     self.tk.call('wm', 'iconphoto', self._w, iconimage)
+        # except Exception as ex:
+        #     print(str(ex))
+
+        # THIS DOES NOT WORK
+        # from Foundation import NSBundle
+        # bundle = NSBundle.mainBundle()
+        # if bundle:
+        #     info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
+        #     if info and info['CFBundleName'] == 'Python':
+        #         info['CFBundleName'] = "pyid3tag"
+        pass
+
+    def _show_preferences(self):
+        tkinter.messagebox.showinfo("Preferences for pyid3tag", "None currently defined")
+
+    def _show_about(self):
+        # TODO Replace this with a custom dialog.
+        about_text = \
+"""ID3 Tag Editor
+
+Copyright © 2019 by Dave Hocker
+Source: https://github.com/dhocker/pyid3tag
+License: GNU General Public License v3 
+as published by the Free Software Foundation, Inc.
+"""
+        tkinter.messagebox.showinfo("About pyid3tag", about_text)
 
     def _on_close(self):
         """
