@@ -33,6 +33,7 @@ import mutagen
 import mutagen.id3
 import id3frames
 from filelist_widget import FileList
+from filetreeview import FileTreeView
 from id3tags_widget import ID3TagsWidget
 from status_bar import StatusBar
 
@@ -109,14 +110,23 @@ class ID3EditorFrame(Tk):
 
         self.columnconfigure(0, weight=1)
         # self.columnconfigure(1, weight=2)
+        self.rowconfigure(0, weight=1)
 
         # Left hand frame (file list)
-        self._filelist = FileList(self, width=int(sw / 6) - 10, height=int(sh / 2) - 10,
-                                  open_file=self._open_file, save_file=self._save_file,
-                                  select_file=self._select_file,
-                                  open_directory=self._open_directory)
+        # self._filelist = FileList(self, width=int(sw / 6) - 10, height=int(sh / 2) - 10,
+        #                           open_file=self._open_file, save_file=self._save_file,
+        #                           select_file=self._select_file,
+        #                           open_directory=self._open_directory)
+        self._filelist = FileTreeView(self, ".", width=int(sw / 6) - 10, height=int(sh / 2) - 10,
+                                      background=None,
+                                      action=self._open_file,
+                                      select=self._select_file)
         self._filelist.grid(row=0, column=0, sticky=tkinter.E + tkinter.W + tkinter.N +tkinter.S,
                             padx=10, pady=10)
+
+        # Make the filetreeview resizable
+        self._filelist.columnconfigure(0, weight=1)
+        self._filelist.rowconfigure(0, weight=1)
 
         # Right hand frame (tags list)
         self._rhframe = Frame(self, width=int(sw / 6) - 20, height=100)
@@ -249,7 +259,9 @@ as published by the Free Software Foundation, Inc.
         self._file_menu.entryconfigure(1, state=tkinter.DISABLED)
 
     def _open_directory_command(self):
-        self._filelist.open_directory()
+        directory = filedialog.askdirectory(initialdir=self._mp3_dir, title="Select directory")
+        if directory:
+            self._filelist.set_path(directory)
 
     def _open_file_command(self):
         self._open_file(self._selected_filename)
