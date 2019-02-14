@@ -26,7 +26,7 @@
 import os.path
 from collections import OrderedDict
 from tkinter import filedialog, messagebox
-from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, Menu
+from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, Menu, PanedWindow
 from tkinter import ttk
 import tkinter
 import mutagen
@@ -38,9 +38,9 @@ from id3tags_widget import ID3TagsWidget
 from status_bar import StatusBar
 
 
-class ID3EditorFrame(Tk):
+class ID3EditorApp(Tk):
     def __init__(self):
-        super(ID3EditorFrame, self).__init__()
+        super(ID3EditorApp, self).__init__()
 
         # Screen metrics
         sw = self.winfo_screenwidth()
@@ -108,30 +108,25 @@ class ID3EditorFrame(Tk):
 
         self.config(menu=self._menu_bar)
 
-        self.columnconfigure(0, weight=1)
-        # self.columnconfigure(1, weight=2)
-        self.rowconfigure(0, weight=1)
+        # paned window - this is the only child of athe app window
+        self._paned = PanedWindow(self, orient=tkinter.HORIZONTAL,
+                                  showhandle=True, handlesize=16,
+                                  sashwidth=20, sashrelief=tkinter.SUNKEN)
+        # self._paned.grid(row=0, column=0, sticky=tkinter.NSEW)
+        self._paned.pack(fill=tkinter.BOTH, expand=1)
 
         # Left hand frame (file list)
-        # self._filelist = FileList(self, width=int(sw / 6) - 10, height=int(sh / 2) - 10,
-        #                           open_file=self._open_file, save_file=self._save_file,
-        #                           select_file=self._select_file,
-        #                           open_directory=self._open_directory)
-        self._filelist = FileTreeView(self, ".", width=int(sw / 6) - 10, height=int(sh / 2) - 10,
+        self._filelist = FileTreeView(self._paned, ".",
                                       background=None,
                                       action=self._open_file,
                                       select=self._select_file)
-        self._filelist.grid(row=0, column=0, sticky=tkinter.E + tkinter.W + tkinter.N +tkinter.S,
-                            padx=10, pady=10)
 
         # Make the filetreeview resizable
         self._filelist.columnconfigure(0, weight=1)
         self._filelist.rowconfigure(0, weight=1)
 
         # Right hand frame (tags list)
-        self._rhframe = Frame(self, width=int(sw / 6) - 20, height=100)
-        self._rhframe.grid(row=0, column=1, sticky=tkinter.E + tkinter.W + tkinter.N + tkinter.S,
-                           padx=10, pady=10)
+        self._rhframe = Frame(self._paned)
 
         # Grid row tracker for right hand frame (tags info)
         gr = 0
@@ -140,18 +135,24 @@ class ID3EditorFrame(Tk):
         self._tags_frame = ID3TagsWidget(self._rhframe, text="Tags", width=int(sw / 4) - 10,
                                          height=10, borderwidth=2,
                                          tag_changed=self._changed_tag)
-        self._tags_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10)
+        self._tags_frame.grid(row=gr, column=0, sticky=tkinter.NSEW, padx=10)
 
         gr += 1
 
         # Footer frame
+        # TODO Refactor this code to the "tags widget"
         self._footer_frame = Frame(self._rhframe, width=int(sw / 4) - 20, bg=self.highlight_color,
                                    bd=1, relief=tkinter.SOLID)
-        self._footer_frame.grid(row=gr, column=0, sticky=tkinter.E + tkinter.W, padx=10, pady=10)
+        self._footer_frame.grid(row=gr, column=0, sticky=tkinter.EW, padx=10, pady=10)
 
         # Status bar in footer frame
         self._status_bar = StatusBar(self._footer_frame, text="", bg=self.highlight_color, bd=0)
-        self._status_bar.grid(row=0, column=0, sticky=tkinter.W + tkinter.E)
+        self._status_bar.grid(row=0, column=0, sticky=tkinter.EW)
+
+        # This is the key to getting both panes to expand equally
+        # Ref: https://stackoverflow.com/questions/27636904/how-to-create-expanding-panedwindow-with-gridlayout-in-tkinter
+        self._paned.add(self._filelist, stretch="always")
+        self._paned.add(self._rhframe, stretch="always")
 
     def _change_app_icon(self):
         # THIS DOES NOT WORK
@@ -287,7 +288,7 @@ as published by the Free Software Foundation, Inc.
 
 
 if __name__ == '__main__':
-    main_frame = ID3EditorFrame()
+    main_frame = ID3EditorApp()
     main_frame.mainloop()
     print (main_frame._filename)
     print("Ended")
