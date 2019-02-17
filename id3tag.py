@@ -36,6 +36,7 @@ from filelist_widget import FileList
 from filetreeview import FileTreeView
 from id3tags_widget import ID3TagsWidget
 from status_bar import StatusBar
+from text_message_box import TextMessageBox
 
 
 class ID3EditorApp(Tk):
@@ -181,16 +182,17 @@ class ID3EditorApp(Tk):
         tkinter.messagebox.showinfo("Preferences for pyid3tag", "None currently defined")
 
     def _show_about(self):
-        # TODO Replace this with a custom dialog.
         about_text = \
-"""ID3 Tag Editor
+            "Copyright © 2019 by Dave Hocker\n" + \
+            "\n" + \
+            "Source: https://github.com/dhocker/pyid3tag\n" + \
+            "License: GNU General Public License v3\n" + \
+            "as published by the Free Software Foundation, Inc."
 
-Copyright © 2019 by Dave Hocker
-Source: https://github.com/dhocker/pyid3tag
-License: GNU General Public License v3 
-as published by the Free Software Foundation, Inc.
-"""
-        tkinter.messagebox.showinfo("About pyid3tag", about_text)
+        # This is a modal message box
+        mb = TextMessageBox(self, title="About pyid3tag", text=about_text, heading="ID3 Tag Editor")
+        mb.show()
+        self.wait_window(window=mb)
 
     def _on_close(self):
         """
