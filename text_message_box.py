@@ -16,9 +16,12 @@
 # along with this program (the LICENSE file).  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import os
 import tkinter
-from tkinter import Text, Scrollbar, Button, Frame
+from tkinter import Text, Scrollbar, Button, Frame, Label
 from tkinter import font as tkfont
+import PIL.Image
+import PIL.ImageTk
 
 class TextMessageBox(tkinter.Toplevel):
     """
@@ -28,6 +31,7 @@ class TextMessageBox(tkinter.Toplevel):
                  title="Text Message Box", text=None, heading=None,
                  font="TkDefaultFont",
                  x=None, y=None, width=100, height=100,
+                 image=None,
                  close=None):
         """
         Create top level window containing tag help
@@ -40,6 +44,7 @@ class TextMessageBox(tkinter.Toplevel):
         :param y: Where to position window. Default is center screen.
         :param width: width of window in px
         :param height: height of window in px
+        :param image: image to be display in message box
         :param close: callback for window close event
         """
         super(TextMessageBox, self).__init__(parent, width=width, height=height)
@@ -54,6 +59,11 @@ class TextMessageBox(tkinter.Toplevel):
         self.on_close = close
         self.title(title)
 
+        # Logo image
+        self._image = None
+        if image and os.path.exists(image):
+            self._image = PIL.ImageTk.PhotoImage(file=image)
+
         # Use font to determine needed height
         f = tkfont.Font(self, font=font)
 
@@ -66,8 +76,10 @@ class TextMessageBox(tkinter.Toplevel):
         char_width = int(float(f.measure(longest_line) + f.measure("\n")) * 1.15) + int(padx * 2)
         # The height is set at a max of 40 lines with 2 lines for padding
         max_text_height = min(len(text_lines), 40) + 2
-        # The window height includes the button and more padding
+        # The window height includes the button, logo image and more padding
         max_window_height = max_text_height  + int((pady * 5) / line_height)
+        if self._image:
+            max_window_height += int(self._image.height() / line_height)
 
         # Determine origin of the window, in the middle of the screen
         if x is None and y is None:
@@ -110,6 +122,13 @@ class TextMessageBox(tkinter.Toplevel):
 
         self._button = Button(self, text="Close", width=4, command=self._on_tag_help_close)
         self._button.grid(row=1, column=0, columnspan=2, pady=int(pady / 2), sticky=tkinter.S)
+
+        # Avatar image
+        # TODO Try different placements
+        if self._image:
+            self._avatar = Label(self, image=self._image)
+            self._avatar.grid(row=2, column=0, columnspan=2)
+            self._avatar._image = self._image
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)

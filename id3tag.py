@@ -24,6 +24,7 @@
 
 # Python 3
 import os.path
+import inspect
 from collections import OrderedDict
 from tkinter import filedialog, messagebox
 from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, Menu, PanedWindow
@@ -189,8 +190,19 @@ class ID3EditorApp(Tk):
             "License: GNU General Public License v3\n" + \
             "as published by the Free Software Foundation, Inc."
 
+        # Locate logo image file
+        cwd = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile(inspect.currentframe()))[0]))
+        if os.path.exists(cwd + "/id3tag.gif"):
+            image_path = cwd + "/id3tag.gif"
+        elif os.path.exists(cwd + "/resources/id3tag.gif"):
+            image_path = cwd + "/resources/id3tag.gif"
+        else:
+            image_path = "id3tag.gif"
+
         # This is a modal message box
-        mb = TextMessageBox(self, title="About pyid3tag", text=about_text, heading="ID3 Tag Editor")
+        mb = TextMessageBox(self, title="About pyid3tag", text=about_text,
+                            heading="ID3 Tag Editor",
+                            image=image_path)
         mb.show()
         self.wait_window(window=mb)
 
