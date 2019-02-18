@@ -202,7 +202,7 @@ class ID3EditorApp(Tk):
         # This is a modal message box
         mb = TextMessageBox(self, title="About pyid3tag", text=about_text,
                             heading="ID3 Tag Editor",
-                            image=image_path)
+                            image=image_path, orient=tkinter.HORIZONTAL)
         mb.show()
         self.wait_window(window=mb)
 
