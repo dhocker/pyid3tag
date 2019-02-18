@@ -1,4 +1,4 @@
-# pyid3tag - Basic ID3 Tag Editor
+# ![ID3Tag Logo](resources/id3tag.gif) pyid3tag - Basic ID3 Tag Editor
 Copyright © 2019 by Dave Hocker
 
 ## Overview
