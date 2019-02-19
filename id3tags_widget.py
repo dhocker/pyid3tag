@@ -245,7 +245,8 @@ class ID3TagsWidget(LabelFrame):
         # Need to update tags list
         self.load_tags(self.id3)
         self.tags_changed = True
-        # messagebox.showinfo("Delete", "Not implemented")
+        if self._tag_changed_callback:
+            self._tag_changed_callback(tag_name, None)
 
     def _on_enter_tag(self, event):
         pass
