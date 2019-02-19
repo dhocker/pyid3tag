@@ -225,7 +225,8 @@ class ID3EditorApp(Tk):
             self._tags_frame.tags_changed = False
             self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.DISABLED)
         except mutagen.id3.ID3NoHeaderError as ex:
-            messagebox.showerror("No Header Error", str(ex))
+            # messagebox.showerror("No Header Error", str(ex))
+            self._status_bar.set(str(ex))
             self.id3 = mutagen.id3.ID3()
             self._tags_frame.load_tags(self.id3)
         except Exception as err:
