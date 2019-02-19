@@ -17,7 +17,8 @@
 
 from collections import OrderedDict
 from tkinter import filedialog, messagebox
-from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, OptionMenu
+from tkinter import Tk, Frame, Button, Label, LabelFrame, Entry, StringVar, OptionMenu, \
+    simpledialog
 import tkinter
 import id3frames
 from tool_tip_popup import ToolTipPopup
@@ -87,11 +88,39 @@ class ID3TagsWidget(LabelFrame):
         self._tags_changed = value
 
     def add_tag(self, tag):
-        f = id3frames.create(tag, "")
+        if tag == "COMM":
+            # Get description and language
+            comm_parms = self._get_comm_tag_parms()
+            if not comm_parms:
+                return
+            tag = tag + ":" + comm_parms
+        f = id3frames.create(tag, "?")
         self.id3.add(f)
         self._tags_changed = True
         # Reload all of the tags so they are sorted
         self.load_tags(self.id3)
+
+        if self._tag_changed_callback:
+            self._tag_changed_callback(tag, "")
+
+    def _get_comm_tag_parms(self):
+        """
+        Get description and language
+        :return:
+        """
+        valid = False
+        while not valid:
+            comm_parms = simpledialog.askstring("COMM Description and Language",
+                                                "Enter description:XXX where XXX is a 3 letter language")
+            if not comm_parms:
+                return None
+
+            parts = comm_parms.split(':')
+            if len(parts) != 2 or len(parts[1]) != 3:
+                messagebox.showerror("COMM Description:Language", "Required format is description:XXX\nWhere XXX is a 3 character language identifier")
+            else:
+                valid = True
+        return comm_parms
 
     def load_tags(self, id3):
         self.id3 = id3

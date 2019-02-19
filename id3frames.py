@@ -20,6 +20,10 @@ import mutagen.id3
 
 def create_comm(tag, value):
     parts = tag.split(':')
+    if len(parts) == 1:
+        # COMM::
+        return mutagen.id3.COMM(text=value)
+    # COMM:desc:lang
     return mutagen.id3.COMM(desc=parts[1], lang=parts[2], text=value)
 
 def create_talb(tag, value):
