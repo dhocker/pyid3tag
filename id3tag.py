@@ -89,14 +89,11 @@ class ID3EditorApp(Tk):
 
             self.createcommand('tk::mac::ShowPreferences', self._show_preferences)
 
-            self._change_app_icon()
-
         self._file_menu = Menu(self._menu_bar, tearoff=0)
         self._file_menu.add_command(label="Open directory", command=self._open_directory_command)
         self._file_menu.add_command(label="Edit file", command=self._open_file_command,
                                     state=tkinter.DISABLED)
         self._file_menu_edit_index = 1
-        # TODO Implement save file command
         self._file_menu.add_command(label="Save file", command=self._save_file_command, state=tkinter.DISABLED)
         self._file_menu_save_index = 2
         self._file_menu.add_separator()
@@ -158,29 +155,6 @@ class ID3EditorApp(Tk):
         self._paned.add(self._filelist, stretch="always")
         self._paned.add(self._rhframe, stretch="always")
 
-    def _change_app_icon(self):
-        # THIS DOES NOT WORK
-        # import sys
-        # from tkinter import PhotoImage
-        #
-        # program_directory = sys.path[0]
-        #
-        # iconfile = os.path.join(program_directory) + "/pyid3tag.gif"
-        # try:
-        #     iconimage = PhotoImage(file=iconfile)
-        #     self.tk.call('wm', 'iconphoto', self._w, iconimage)
-        # except Exception as ex:
-        #     print(str(ex))
-
-        # THIS DOES NOT WORK
-        # from Foundation import NSBundle
-        # bundle = NSBundle.mainBundle()
-        # if bundle:
-        #     info = bundle.localizedInfoDictionary() or bundle.infoDictionary()
-        #     if info and info['CFBundleName'] == 'Python':
-        #         info['CFBundleName'] = "pyid3tag"
-        pass
-
     def _show_preferences(self):
         tkinter.messagebox.showinfo("Preferences for pyid3tag", "None currently defined")
 
@@ -227,8 +201,6 @@ class ID3EditorApp(Tk):
         self._tags_frame.commit_tag_updates()
         self.id3.save(fn)
         self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.DISABLED)
-        # messagebox.showinfo("Saved", "Tags saved to %s" % self.filename)
-        # TODO How to handle this
         self._status_bar.set("Tags saved to %s" % fn)
 
     def _open_file(self, fn):
@@ -310,5 +282,3 @@ class ID3EditorApp(Tk):
 if __name__ == '__main__':
     main_frame = ID3EditorApp()
     main_frame.mainloop()
-    print (main_frame._filename)
-    print("Ended")
