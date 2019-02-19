@@ -95,8 +95,10 @@ class ID3EditorApp(Tk):
         self._file_menu.add_command(label="Open directory", command=self._open_directory_command)
         self._file_menu.add_command(label="Edit file", command=self._open_file_command,
                                     state=tkinter.DISABLED)
+        self._file_menu_edit_index = 1
         # TODO Implement save file command
-        self._file_menu.add_command(label="Save file", command=None, state=tkinter.DISABLED)
+        self._file_menu.add_command(label="Save file", command=self._save_file_command, state=tkinter.DISABLED)
+        self._file_menu_save_index = 2
         self._file_menu.add_separator()
         self._file_menu.add_command(label="Quit", command=self._on_close)
         self._menu_bar.add_cascade(label="File", menu=self._file_menu)
@@ -224,6 +226,7 @@ class ID3EditorApp(Tk):
         """
         self._tags_frame.commit_tag_updates()
         self.id3.save(fn)
+        self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.DISABLED)
         # messagebox.showinfo("Saved", "Tags saved to %s" % self.filename)
         # TODO How to handle this
         self._status_bar.set("Tags saved to %s" % fn)
@@ -248,6 +251,7 @@ class ID3EditorApp(Tk):
             self._tags_frame.load_tags(self.id3)
             self._status_bar.set(fn)
             self._tags_frame.tags_changed = False
+            self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.DISABLED)
         except mutagen.id3.ID3NoHeaderError as ex:
             messagebox.showerror("No Header Error", str(ex))
             self.id3 = mutagen.id3.ID3()
@@ -263,7 +267,7 @@ class ID3EditorApp(Tk):
         """
         # Once a file is selected it can be opened
         self._selected_filename = fn
-        self._file_menu.entryconfigure(1, state=tkinter.NORMAL)
+        self._file_menu.entryconfigure(self._file_menu_edit_index, state=tkinter.NORMAL)
 
     def _open_directory(self):
         """
@@ -285,7 +289,7 @@ class ID3EditorApp(Tk):
         self._save_file(self._filename)
 
     def _changed_tag(self, tag_name, tag_value):
-        self._file_menu.entryconfigure(2, state=tkinter.NORMAL)
+        self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.NORMAL)
         # TODO How to pass changed_tag event to filelist widget?
 
     def _are_unsaved_changes(self):
