@@ -275,12 +275,14 @@ class ID3EditorApp(Tk):
         :return:
         """
         # Since nothing is selected, disable the open file menu item
-        self._file_menu.entryconfigure(1, state=tkinter.DISABLED)
+        self._file_menu.entryconfigure(self._file_menu_edit_index, state=tkinter.DISABLED)
 
     def _open_directory_command(self):
         directory = filedialog.askdirectory(initialdir=self._mp3_dir, title="Select directory")
         if directory:
             self._filelist.set_path(directory)
+            # Since nothing is selected, disable the open file menu item
+            self._file_menu.entryconfigure(self._file_menu_edit_index, state=tkinter.DISABLED)
 
     def _open_file_command(self):
         self._open_file(self._selected_filename)
