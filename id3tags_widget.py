@@ -64,7 +64,8 @@ class ID3TagsWidget(LabelFrame):
         self._tag_help_button.grid(row=0, column=3, sticky=tkinter.E, padx=10)
 
         # Delete tag button - deletes the current tag
-        self._delete_button = Button(self._buttons_frame, text="Delete Tag", width=10, command=self._delete_tag)
+        self._delete_button = Button(self._buttons_frame, text="Delete Tag", width=10,
+                                     command=self._delete_tag, state=tkinter.DISABLED)
         self._delete_button.grid(row=0, column=4, sticky=tkinter.E, padx=10)
 
         # Handle changes to tag values
@@ -255,12 +256,14 @@ class ID3TagsWidget(LabelFrame):
     def _on_focusin(self, event):
         event.widget.label_widget["bg"] = self.highlight_color
         self._selected_tag = event.widget
+        self._delete_button.configure(state=tkinter.NORMAL)
 
     def _on_focusout(self, event):
         tvw = event.widget
         tvw.label_widget["bg"] = self.background_color
         # Save edited tag value
         self._update_tag(tvw.tag_name, tvw.value_var.get())
+        self._delete_button.configure(state=tkinter.DISABLED)
 
     def commit_tag_updates(self):
         # TODO Is this needed now that on_focusout also saves the tag value?
