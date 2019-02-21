@@ -60,7 +60,7 @@ class ID3TagsWidget(LabelFrame):
         self._tag_opt.grid(row=0, column=2, sticky=tkinter.E, padx=10)
 
         # Tag help button
-        self._tag_help_button = Button(self._buttons_frame, text="Tag Help", width=9, command=self._show_tag_help)
+        self._tag_help_button = Button(self._buttons_frame, text="Tag Help", width=9, command=self.show_tag_help)
         self._tag_help_button.grid(row=0, column=3, sticky=tkinter.E, padx=10)
 
         # Delete tag button - deletes the current tag
@@ -216,7 +216,7 @@ class ID3TagsWidget(LabelFrame):
         t = self._add_this_tag.get()
         self.add_tag(t)
 
-    def _show_tag_help(self):
+    def show_tag_help(self):
         if not self._tag_help_window:
             # Position the help window to the right of the main window
             top = self.winfo_toplevel()

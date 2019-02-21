@@ -89,6 +89,7 @@ class ID3EditorApp(Tk):
 
             self.createcommand('tk::mac::ShowPreferences', self._show_preferences)
 
+        # File menu
         self._file_menu = Menu(self._menu_bar, tearoff=0)
         self._file_menu.add_command(label="Open directory", command=self._open_directory_command)
         self._file_menu.add_command(label="Edit file", command=self._open_file_command,
@@ -100,16 +101,19 @@ class ID3EditorApp(Tk):
         self._file_menu.add_command(label="Quit", command=self._on_close)
         self._menu_bar.add_cascade(label="File", menu=self._file_menu)
 
+        # Help menu
+        self._help_menu = Menu(self._menu_bar, tearoff=0)
         # Linux or Win
         # Reference: https://tkdocs.com/tutorial/menus.html
         if gfx_platform != 'aqua':
-            self._help_menu = Menu(self._menu_bar, tearoff=0)
-            self._help_menu.add_command(label="About", command=self._show_about, state=tkinter.DISABLED)
-            self._menu_bar.add_cascade(label="Help", menu=self._help_menu)
+            self._help_menu.add_command(label="About", command=self._show_about)
+        self._help_menu.add_command(label="Application", command=self._show_app_help)
+        self._help_menu.add_command(label="Tags", command=self._show_tag_help)
+        self._menu_bar.add_cascade(label="Help", menu=self._help_menu)
 
         self.config(menu=self._menu_bar)
 
-        # paned window - this is the only child of athe app window
+        # paned window - this is the only child of the app window
         self._paned = PanedWindow(self, orient=tkinter.HORIZONTAL,
                                   showhandle=True, handlesize=16,
                                   sashwidth=20, sashrelief=tkinter.SUNKEN)
@@ -181,6 +185,13 @@ class ID3EditorApp(Tk):
                             image=image_path, orient=tkinter.HORIZONTAL)
         mb.show()
         self.wait_window(window=mb)
+
+    def _show_app_help(self):
+        import webbrowser
+        webbrowser.open("https://github.com/dhocker/pyid3tag/blob/master/README.md", new=2)
+
+    def _show_tag_help(self):
+        self._tags_frame.show_tag_help()
 
     def _on_close(self):
         """
