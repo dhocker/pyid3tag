@@ -1,6 +1,12 @@
 # ![ID3Tag Logo](resources/id3tag.gif) pyid3tag - Basic ID3 Tag Editor
 Copyright © 2019 by Dave Hocker
 
+## Contents
+* [Overview](#overview)
+* [Running the App](#running-the-app)
+* [User Interface](#user-interface)
+* [References](#references)
+
 ## Overview
 This app is a very basic ID3 tag editor for mp3 files. It is written in Python 3 
 using TkInter and
