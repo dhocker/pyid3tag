@@ -218,13 +218,11 @@ class ID3TagsWidget(LabelFrame):
 
     def _show_tag_help(self):
         if not self._tag_help_window:
-            # We would like to position the help window to the right size
-            # of the main window. However, we really don't know the main window.
-            # This is about as dangerous as it gets...depending on the main
-            # window being 2 back
+            # Position the help window to the right of the main window
+            top = self.winfo_toplevel()
             self._tag_help_window = TagHelpWindow(self,
-                                                  x=self.master.master.winfo_rootx() + self.master.master.winfo_width() + 1,
-                                                  y=self.master.master.winfo_rooty(),
+                                                  x=top.winfo_rootx() + top.winfo_width() + 1,
+                                                  y=top.winfo_rooty(),
                                                   width=400, height=200,
                                                   close=self._on_tag_help_close)
         else:
