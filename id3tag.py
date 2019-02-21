@@ -139,7 +139,9 @@ class ID3EditorApp(Tk):
         # Tags widget
         self._tags_frame = ID3TagsWidget(self._rhframe, text="Tags", width=int(sw / 4) - 10,
                                          height=10, borderwidth=2,
-                                         tag_changed=self._changed_tag)
+                                         tag_changed=self._changed_tag,
+                                         tag_added=self._added_tag,
+                                         tag_deleted=self._deleted_tag)
         self._tags_frame.grid(row=gr, column=0, sticky=tkinter.NSEW, padx=10)
 
         gr += 1
@@ -277,6 +279,12 @@ class ID3EditorApp(Tk):
     def _changed_tag(self, tag_name, tag_value):
         self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.NORMAL)
         # TODO How to pass changed_tag event to filelist widget?
+
+    def _added_tag(self, tag_name):
+        self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.NORMAL)
+
+    def _deleted_tag(self, tag_name):
+        self._file_menu.entryconfigure(self._file_menu_save_index, state=tkinter.NORMAL)
 
     def _are_unsaved_changes(self):
         """

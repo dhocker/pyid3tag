@@ -27,7 +27,7 @@ from tag_help_window import TagHelpWindow
 
 class ID3TagsWidget(LabelFrame):
     def __init__(self, parent, text="", width=100, height=10, borderwidth=0,
-                 tag_changed=None):
+                 tag_changed=None, tag_added=None, tag_deleted=None):
         super(ID3TagsWidget, self).__init__(parent, text=text, width=width, height=height,
                                             borderwidth=borderwidth)
 
@@ -36,6 +36,8 @@ class ID3TagsWidget(LabelFrame):
         self.id3 = None
         self._tags_changed = False
         self._tag_changed_callback = tag_changed
+        self._tag_added_callback = tag_added
+        self._tag_deleted_callback = tag_deleted
         self._tag_help_window = None
 
         # Each list item is a 2-tuple of tag label and tag text widget
@@ -101,8 +103,8 @@ class ID3TagsWidget(LabelFrame):
         # Reload all of the tags so they are sorted
         self.load_tags(self.id3)
 
-        if self._tag_changed_callback:
-            self._tag_changed_callback(tag, "")
+        if self._tag_added_callback:
+            self._tag_added_callback(tag)
 
     def _get_comm_tag_parms(self):
         """
@@ -244,8 +246,8 @@ class ID3TagsWidget(LabelFrame):
         # Need to update tags list
         self.load_tags(self.id3)
         self.tags_changed = True
-        if self._tag_changed_callback:
-            self._tag_changed_callback(tag_name, None)
+        if self._tag_deleted_callback:
+            self._tag_deleted_callback(tag_name)
 
     def _on_enter_tag(self, event):
         pass
